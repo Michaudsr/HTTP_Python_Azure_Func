@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 import logging
 
 import azure.functions as func
@@ -6,19 +7,19 @@ import azure.functions as func
 def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a request.')
 
-    method_type = req.method
-    if method_type == "GET":
-        name = req.params.get('name')
-    elif method_type == "POST":
-        try:
-            req_body = req.get_json()
-        except ValueError:
-            name = None
-        else:
-            name = req_body.get('name')
+    @dataclass
+    class Person:
+     name: str = None
 
-    if name:
-        return func.HttpResponse(f"Hello, {name}. This HTTP triggered function executed successfully.",
+    try:
+        req_body = req.get_json()
+    except ValueError:
+        person = Person(name =None)
+    else:
+        person = Person(name=req_body.get('name'))
+
+    if person.name:
+        return func.HttpResponse(f"Hello, {person.name}. This HTTP triggered function executed successfully.",
         status_code=200)
     else:
         return func.HttpResponse(
